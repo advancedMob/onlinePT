@@ -31,7 +31,7 @@ def signin(request):
             user = User.objects.get(useremail=useremail)
             if user.password != password:
                 context = {
-                'error': '비밀번호를 다시 확인해주세요!',
+                    'error': '비밀번호를 다시 확인해주세요!',
                 }
                 return render(request, 'mysite/login.html', context)
             else:
@@ -39,14 +39,14 @@ def signin(request):
                     'user': user,
                 }
                 print("hi user")
-                return render(request, 'mysite/index.html', context)
+                return render(request, 'mysite/listing.html', context)
 
         except User.DoesNotExist:
             try:
                 trainer = Trainer.objects.get(useremail=useremail)
                 if trainer.password != password:
                     context = {
-                    'error': '비밀번호를 다시 확인해주세요!',
+                        'error': '비밀번호를 다시 확인해주세요!',
                     }
                     return render(request, 'mysite/login.html', context)
                 else:
@@ -54,7 +54,7 @@ def signin(request):
                         'user': trainer,
                     }
                     print("hi trainer")
-                    return render(request, 'mysite/index.html', context)
+                    return render(request, 'mysite/listing.html', context)
 
             except Trainer.DoesNotExist:
                 # JavaScript로 경고창을 표시하기 위해 HttpResponse 객체를 반환
@@ -80,14 +80,23 @@ def signup(request):
         if request.POST['type'] == "user":
             User.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
             
-            return redirect('mysite:index')
+            return redirect('mysite:listing')
         
         elif request.POST['type'] == "trainer":
             Trainer.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
             
-            return redirect('mysite:index')
+            return redirect('mysite:listing')
 
 
 def signout(request):
     logout(request)
     return redirect('mysite:index')
+
+def listing(request):
+    return render(request, 'mysite/listing.html')
+
+def postView(request):
+    return render(request, 'mysite/postView.html')
+
+def postWrite(request):
+    return render(request, 'mysite/postWrite.html')
