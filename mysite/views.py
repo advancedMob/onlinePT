@@ -1,8 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 
 from .models import User, Trainer
+from .models import Post, Reply
 
 # Create your views here.
 
@@ -95,8 +97,40 @@ def signout(request):
 def listing(request):
     return render(request, 'mysite/listing.html')
 
+def page(request):
+    post_list = Post.objects.order_by('-create_date')
+    paginator = Paginator(post_list, 10)
+    page_obj = paginator.get_page(page)
+    context = {'post_list': page_obj}
+    return render(request, 'mysite/listing.html', context)
+
+
 def postView(request):
     return render(request, 'mysite/postView.html')
 
 def postWrite(request):
-    return render(request, 'mysite/postWrite.html')
+    posts = Post.objects.all()
+    if request.method == 'POST':
+        subject = request.POST['subject']
+        message = request.POST['message']
+
+        user = User.objects.first()
+
+        post = Post.objects.create(
+            subject=subject,
+            message=message,
+            writer=user
+        )
+
+        post = Reply.objects.create(
+            message=message,
+            created_by=user
+        )
+
+        return redirect('mysite:listing')
+
+    return render(request,'mysite/postWrite.html',{'posts':posts})
+
+def post_list(request):
+    posts = Post.objects.all().order_by('-id')
+    return render(request,'mysite/listing.html',{"posts":posts})
