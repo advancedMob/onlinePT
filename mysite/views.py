@@ -1,8 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 
 from .models import User, Trainer
+from .models import Board, ReplyUser, ReplyTrainer
 
 # Create your views here.
 
@@ -95,8 +97,46 @@ def signout(request):
 def listing(request):
     return render(request, 'mysite/listing.html')
 
+def page(request):
+    post_list = Board.objects.order_by('-create_date')
+    paginator = Paginator(post_list, 10)
+    page_obj = paginator.get_page(page)
+    context = {'post_list': page_obj}
+    return render(request, 'mysite/listing.html', context)
+
+
 def postView(request):
     return render(request, 'mysite/postView.html')
 
 def postWrite(request):
-    return render(request, 'mysite/postWrite.html')
+    boards = Board.objects.all()
+    if request.method == 'POST':
+        subject = request.POST['subject']
+        message = request.POST['message']
+
+        user = User.objects.first()
+        trainer = Trainer.objects.first()
+
+        board = Board.objects.create(
+            subject=subject,
+            message=message,
+            writer=user
+        )
+
+        replyUser = ReplyUser.objects.create(
+            message=message,
+            created_by=user
+        )
+
+        replyTrainer = ReplyTrainer.objects.create(
+            message=message,
+            created_by=trainer
+        )
+
+        return redirect('mysite:board_list')
+
+    return render(request,'mysite/postWrite.html',{'boards':boards})
+
+def board_list(request):
+    boards = Board.objects.all().order_by('-id')
+    return render(request,'mysite/listing.html',{"boards":boards})

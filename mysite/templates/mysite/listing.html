@@ -85,14 +85,16 @@
     <table class="table">
         <thead>
             <tr class="thead-dark">
-                <th>순번</th><th>포스트 제목</th><th>발행일자</th>
+                <th>순번</th><th>포스트 제목</th><th>이름</th><th>작성일</th>
             </tr>
         </thead>
         <tbody>
-            {% for post in post_list %}
+            {% for board in boards %}
             <tr>
-                <td>{{post.id}}</td><td><a href="{% url 'mysite:postView{{post.id}}' %}">{{post.subject}}</a></td>
-                <td>{{post.posting_date}}</td>
+                <td>{{board.id}}</td>
+                <td>{{board.subject}}</td>
+                <td>{{board.writer}}</td>
+                <td>{{board.last_updated}}</td>
             </tr>
             {%endfor%}
             <tr><td colspan=3 align=right><a href="{% url 'mysite:postWrite' %}">포스트 등록하기</a></td></tr>
