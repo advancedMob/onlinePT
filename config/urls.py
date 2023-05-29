@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.urls import path, include
 from django.contrib import admin
-
+from django.template.context_processors import static
+from config import settings
 from mysite import views
 
 urlpatterns = [

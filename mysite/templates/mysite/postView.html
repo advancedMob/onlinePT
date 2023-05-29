@@ -9,16 +9,19 @@
             <h3>포스트 보기</h3>
             <table class="table table-bordered">
                 <tr class="active">
-                    <td>순번</td><td>포스트 제목</td><td>발행일자</td>
+                    <td>순번</td><td>제목</td><td>작성자</td><td>최근 수정일</td>
                 </tr>
                 <tbody>
                     <tr>
-                        <td>{{post.id}}</td><td>{{post.subject}}</td><td>{{post.posting_date}}</td>
+                        <td>{{board.id}}</td>
+                        <td>{{board.subject}}</td>
+                        <td>{{board.writer}}</td>
+                        <td>{{board.last_updated}}</td>
                     </tr>
                     <tr>
                         <td class="active" colspan=3>내용</td>
                     <tr>
-                        <td colspan=3>{{post.content}}</td>
+                        <td colspan=3>{{board.content}}</td>
                     </tr>
                 </tbody>
             </table>

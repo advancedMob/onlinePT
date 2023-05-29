@@ -13,4 +13,5 @@ urlpatterns = [
     path('listing/', views.listing, name='listing'),
     path('postView/', views.postView, name='postView'),
     path('postWrite/', views.postWrite, name='postWrite'),
+    path('board_list/', views.board_list, name='board_list'),
 ]
