@@ -1,14 +1,16 @@
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
+from django.conf import settings
 from .models import User, Trainer
+from .models import Board, Comment
+from .forms import CommentForm
 
 # Create your views here.
 
 
 def index(request):
-
     return render(request, 'mysite/index.html')
 
 def login(request):
@@ -35,11 +37,13 @@ def signin(request):
                 }
                 return render(request, 'mysite/login.html', context)
             else:
+
                 context = {
                     'user': user,
                 }
                 print("hi user")
-                return render(request, 'mysite/listing.html', context)
+                return redirect('mysite:board_list')
+                #return render(request, 'mysite/listing.html', context)
 
         except User.DoesNotExist:
             try:
@@ -54,7 +58,8 @@ def signin(request):
                         'user': trainer,
                     }
                     print("hi trainer")
-                    return render(request, 'mysite/listing.html', context)
+                    return redirect('mysite:board_list')
+                    #return render(request, 'mysite/listing.html', context)
 
             except Trainer.DoesNotExist:
                 # JavaScript로 경고창을 표시하기 위해 HttpResponse 객체를 반환
@@ -79,12 +84,12 @@ def signup(request):
     if request.method == "POST":
         if request.POST['type'] == "user":
             User.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
-            
+
             return redirect('mysite:listing')
         
         elif request.POST['type'] == "trainer":
             Trainer.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
-            
+
             return redirect('mysite:listing')
 
 
@@ -95,8 +100,59 @@ def signout(request):
 def listing(request):
     return render(request, 'mysite/listing.html')
 
-def postView(request):
-    return render(request, 'mysite/postView.html')
+def page(request):
+    post_list = Board.objects.order_by('-create_date')
+    paginator = Paginator(post_list, 10)
+    page_obj = paginator.get_page(page)
+    context = {'post_list': page_obj}
+    return render(request, 'mysite/listing.html', context)
+
+
+def postView(request, pk):
+    try:
+        board = get_object_or_404(Board, pk=pk)
+        comments = CommentForm()
+        comment_view = Comment.objects.filter(post=pk)
+
+    except Board.DoesNotExist:
+        raise Http404("Does not exist!")
+    return render(request, 'mysite/postView.html', {'board':board, 'comments':comments, 'comment_view':comment_view})
 
 def postWrite(request):
-    return render(request, 'mysite/postWrite.html')
+    boards = Board.objects.all()
+    if request.method == 'POST':
+        subject = request.POST['subject']
+        message = request.POST['message']
+        video = request.FILES.get('files',None)
+
+        user = User.objects.first()
+
+        board = Board.objects.create(
+            subject=subject,
+            message=message,
+            writer=user,
+            file=video,
+        )
+
+        board.save()
+
+        return redirect('mysite:board_list')
+
+    return render(request,'mysite/postWrite.html',{'boards':boards})
+
+def board_list(request):
+    boards = Board.objects.all().order_by('-id')
+    return render(request,'mysite/listing.html',{"boards":boards})
+
+def comment_write(request, board_id):
+    board = get_object_or_404(Board, pk=board_id)
+    user = User.objects.first()
+    # 댓글 생성하는 로직
+    comment_write = CommentForm(request.POST)
+    if comment_write.is_valid():
+        comments = comment_write.save(commit=False)
+        comments.post = board
+        comments.author = user
+        comments.save()
+
+    return redirect('mysite:postView', board_id)

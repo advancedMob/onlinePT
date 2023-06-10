@@ -2,26 +2,61 @@
 {% load static %}
 <html lang="en">
     <head>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+
+    <title>Online PT 게시판</title>
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/templatemo-training-studio.css' %}">
+
     </head>
     <body>
         <div class="container my-3">
             <h3>포스트 보기</h3>
             <table class="table table-bordered">
                 <tr class="active">
-                    <td>순번</td><td>포스트 제목</td><td>발행일자</td>
+                    <td>순번</td><td>제목</td><td>작성자</td><td>최근 수정일</td>
                 </tr>
                 <tbody>
                     <tr>
-                        <td>{{post.id}}</td><td>{{post.subject}}</td><td>{{post.posting_date}}</td>
+                        <td>{{board.id}}</td>
+                        <td>{{board.subject}}</td>
+                        <td>{{board.writer}}</td>
+                        <td>{{board.last_updated}}</td>
                     </tr>
                     <tr>
                         <td class="active" colspan=3>내용</td>
                     <tr>
-                        <td colspan=3>{{post.content}}</td>
+                        <td colspan=3>{{board.message}}</td>
+                    <tr>
+                        {% if board.file %}
+                        <td colspan=3><video controls width="700"><source src="{{board.file.url}}"/></video></td>
+                        {% endif %}
                     </tr>
                 </tbody>
             </table>
+            <form action="{%url 'mysite:comment_write' board.id%}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{comments}}
+                    <input type="submit" value="댓글등록">
+                </div>
+            </form>
+            <div>
+                <ul>
+                    {%for comment in comment_view %}
+                    <li>{{comment.author}} - {{comment.comment}}</li>
+                    {%endfor%}
+                </ul>
+            </div>
         </div>
     </body>
 </html>
