@@ -27,7 +27,7 @@ def signin(request):
                 'error': '공란 없이 입력해주십시오!',
             }
             return render(request, 'mysite/login.html', context)
-        
+
         #  user 진위여부 확인
         try:
             user = User.objects.get(useremail=useremail)
@@ -68,7 +68,7 @@ def signin(request):
                 }
                 return render(request, 'mysite/login.html', context)
 
-        
+
 
 def signup(request):
     # 중복 이메일 검사 -> 이메일이 중복되는걸 허용하면 signin에서 user과 trainer 신분이 중복될 수 있어서 사전에 방지한다.
@@ -86,7 +86,7 @@ def signup(request):
             User.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
 
             return redirect('mysite:listing')
-        
+
         elif request.POST['type'] == "trainer":
             Trainer.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
 
