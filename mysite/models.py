@@ -65,3 +65,18 @@ class Comment(models.Model):
         db_table = 'comment'
         verbose_name = '댓글'
         verbose_name_plural = '댓글'
+
+class CommentT(models.Model):
+    comment = models.TextField()
+    author = models.ForeignKey(Trainer, on_delete=models.CASCADE)
+    post = models.ForeignKey(Board, null=True, blank=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.comment
+
+    class Meta:
+        db_table = 'commentT'
+        verbose_name = '댓글T'
+        verbose_name_plural = '댓글T'
+

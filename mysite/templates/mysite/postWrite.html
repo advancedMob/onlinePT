@@ -26,7 +26,11 @@
                 <textarea id="content" name="message" class="form-control" rows="5" placeholder="욕설은 삼가해주세요.">
                 </textarea>
             </div>
-            <input type="submit" class="btn btn-primary">
+            {% for message in messages %}
+                {{ message.tag }}
+                {{ message }}
+            {% endfor %}
+            <input type="submit" class="btn btn-primary" value="올리기">
         </form>
     </div>
 </body>

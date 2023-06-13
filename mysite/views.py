@@ -4,8 +4,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.conf import settings
 from .models import User, Trainer
-from .models import Board, Comment
+from .models import Board, Comment, CommentT
 from .forms import CommentForm
+from django.contrib import messages
 
 # Create your views here.
 
@@ -27,7 +28,7 @@ def signin(request):
                 'error': '공란 없이 입력해주십시오!',
             }
             return render(request, 'mysite/login.html', context)
-
+        
         #  user 진위여부 확인
         try:
             user = User.objects.get(useremail=useremail)
@@ -42,6 +43,11 @@ def signin(request):
                     'user': user,
                 }
                 print("hi user")
+                if user is not None:
+                    request.session['userId'] = user.id
+                    request.session['usertype'] = user.usertype
+                    context['user'] = request.session['user']
+                    context['usertype'] = request.session['usertype']
                 return redirect('mysite:board_list')
                 #return render(request, 'mysite/listing.html', context)
 
@@ -58,6 +64,11 @@ def signin(request):
                         'user': trainer,
                     }
                     print("hi trainer")
+                    if trainer is not None:
+                        request.session['userId'] = trainer.id
+                        request.session['usertype'] = trainer.usertype
+                        context['user'] = request.session['user']
+                        context['usertype'] = request.session['usertype']
                     return redirect('mysite:board_list')
                     #return render(request, 'mysite/listing.html', context)
 
@@ -68,7 +79,7 @@ def signin(request):
                 }
                 return render(request, 'mysite/login.html', context)
 
-
+        
 
 def signup(request):
     # 중복 이메일 검사 -> 이메일이 중복되는걸 허용하면 signin에서 user과 trainer 신분이 중복될 수 있어서 사전에 방지한다.
@@ -85,20 +96,22 @@ def signup(request):
         if request.POST['type'] == "user":
             User.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
 
-            return redirect('mysite:listing')
-
+            return redirect('mysite:login')
+        
         elif request.POST['type'] == "trainer":
             Trainer.objects.create(username = request.POST['username'], useremail = request.POST['useremail'],  password = request.POST['password'])
 
-            return redirect('mysite:listing')
+            return redirect('mysite:login')
 
 
 def signout(request):
+    if request.session.get('user'):
+        del(request.session['user'])
     logout(request)
     return redirect('mysite:index')
 
 def listing(request):
-    return render(request, 'mysite/listing.html')
+    return redirect('mysite:board_list')
 
 def page(request):
     post_list = Board.objects.order_by('-create_date')
@@ -111,8 +124,14 @@ def page(request):
 def postView(request, pk):
     try:
         board = get_object_or_404(Board, pk=pk)
-        comments = CommentForm()
+        usertype = request.session.get('usertype')
+        if(usertype=='user'):
+            comments = CommentForm()
+        if(usertype=='trainer'):
+            comments = CommentTForm()
+
         comment_view = Comment.objects.filter(post=pk)
+        commentT_view = CommentT.objects.filter(post=pk)
 
     except Board.DoesNotExist:
         raise Http404("Does not exist!")
@@ -125,16 +144,23 @@ def postWrite(request):
         message = request.POST['message']
         video = request.FILES.get('files',None)
 
-        user = User.objects.first()
+        usertype = request.session.get('usertype')
 
-        board = Board.objects.create(
-            subject=subject,
-            message=message,
-            writer=user,
-            file=video,
-        )
+        if usertype == 'trainer':
+            messages.warning(request, "권한이 없습니다.")
+            return render(request,'mysite/postWrite.html')
 
-        board.save()
+        if usertype == 'user':
+            user_id = request.session.get('userId')
+            user = User.objects.get(pk=user_id)
+            board = Board.objects.create(
+                subject=subject,
+                message=message,
+                writer=user,
+                file=video,
+            )
+
+            board.save()
 
         return redirect('mysite:board_list')
 
@@ -146,13 +172,28 @@ def board_list(request):
 
 def comment_write(request, board_id):
     board = get_object_or_404(Board, pk=board_id)
-    user = User.objects.first()
-    # 댓글 생성하는 로직
-    comment_write = CommentForm(request.POST)
-    if comment_write.is_valid():
-        comments = comment_write.save(commit=False)
-        comments.post = board
-        comments.author = user
-        comments.save()
 
+    usertype = request.session.get('usertype')
+
+    if(usertype == 'user'):
+        user_id = request.session.get('userId')
+        user = User.objects.get(pk=user_id)
+    # 댓글 생성하는 로직
+        comment_write = CommentForm(request.POST)
+        if comment_write.is_valid():
+            comments = comment_write.save(commit=False)
+            comments.post = board
+            comments.author = user
+            comments.save()
+
+    if(usertype == 'trainer'):
+        user_id = request.session.get('userId')
+        user = Trainer.objects.get(pk=user_id)
+
+        comment_write = CommentTForm(request.POST)
+        if comment_write.is_valid():
+            comments = comment_write.save(commit=False)
+            comments.post = board
+            comments.author = user
+            comments.save()
     return redirect('mysite:postView', board_id)

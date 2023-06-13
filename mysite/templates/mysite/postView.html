@@ -11,6 +11,7 @@
 
     <title>Online PT 게시판</title>
     <!-- Additional CSS Files -->
+
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
@@ -20,7 +21,9 @@
     </head>
     <body>
         <div class="container my-3">
-            <h3>포스트 보기</h3>
+            <a class="btn text-white btn-default pull-right" style="background-color: black" href="{% url 'mysite:listing' %}">돌아가기</a>
+            <h3 style="font-style:normal; font-weight: 900">Online <em style="font-style:normal; color:#ed563b; font-weight: 900">PT</em></h3>
+            <br>
             <table class="table table-bordered">
                 <tr class="active">
                     <td>순번</td><td>제목</td><td>작성자</td><td>최근 수정일</td>
@@ -47,13 +50,25 @@
                 {% csrf_token %}
                 <div class="form-group">
                     {{comments}}
-                    <input type="submit" value="댓글등록">
+                    <br>
+                    <input type="submit" class="btn text-white btn-default pull-right" style="background-color: black" value="댓글등록">
+                    <br><br>
                 </div>
             </form>
             <div>
                 <ul>
-                    {%for comment in comment_view %}
+                    {%for comment in commentT_view %}
+                    <hr>
+                    {{comment.created_at}}  <img src="{% static '/images/trainer.svg' %}"/>
                     <li>{{comment.author}} - {{comment.comment}}</li>
+
+                    {%endfor%}
+
+                    {%for comment in comment_view %}
+                    <hr>
+                    {{comment.created_at}}
+                    <li>{{comment.author}} - {{comment.comment}}</li>
+
                     {%endfor%}
                 </ul>
             </div>
