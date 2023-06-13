@@ -9,6 +9,10 @@
     <meta name="author" content="">
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
 
+    <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"/>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/icon.css' %}">
+
     <title>Online PT 게시판</title>
     <!-- Additional CSS Files -->
 
@@ -17,6 +21,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
 
     <link rel="stylesheet" href="{% static 'css/templatemo-training-studio.css' %}">
+
+        <script src="https://kit.fontawesome.com/350fa2ce68.js" crossorigin="anonymous"></script>
 
     </head>
     <body>
@@ -49,6 +55,7 @@
             <form action="{%url 'mysite:comment_write' board.id%}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
+                    <i class="fa-regular fa-comment-dots" style="color: #000000;"></i>
                     {{comments}}
                     <br>
                     <input type="submit" class="btn text-white btn-default pull-right" style="background-color: black" value="댓글등록">
@@ -59,8 +66,8 @@
                 <ul>
                     {%for comment in commentT_view %}
                     <hr>
-                    {{comment.created_at}}  <img src="{% static '/images/trainer.svg' %}"/>
-                    <li>{{comment.author}} - {{comment.comment}}</li>
+                    {{comment.created_at}}
+                    <li><i class="fa-sharp fa-solid fa-medal" style="color: #febd1a;"></i>{{comment.author}} - {{comment.comment}}</li>
 
                     {%endfor%}
 
